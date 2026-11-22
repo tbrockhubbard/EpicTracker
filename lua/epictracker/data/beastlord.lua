@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Beastlord epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -12,10 +13,10 @@ return {
                 { id = 's1', text = 'Elder Animist Muada (-170, +460, 2nd floor): "Hail", "feel able", "dedication"', zone = 'Shar Vahl' },
                 { id = 's2', text = 'Farm the 3 materials', zone = 'Luclin',
                   details = { "2x Gem of the Void: Xi Xaui / death mobs, Maiden's Eye", 'Chunk of Dense Fungal Padding: ancient shrieker, The Deep', 'Perfect Acrylia Ore: trap golems, The Grey' },
-                  nobackfill = true, detect = { 'Gem of the Void', 'Chunk of Dense Fungal Padding', 'Perfect Acrylia Ore' } },
+                  nobackfill = true, all = true, detect = { { 'Gem of the Void', 2 }, 'Chunk of Dense Fungal Padding', 'Perfect Acrylia Ore' } },
                 { id = 's3', text = 'Weapons Master Rahoul: items, "willing", "adornments", then 2000pp', zone = 'Shar Vahl',
                   detect = { 'Adornments Pattern', 'Plain Beastlord Statuette' } },
-                { id = 's4', text = 'Loot 2x Ukun Hide', zone = 'GoD zones', nobackfill = true, detect = { 'Ukun Hide' } },
+                { id = 's4', text = 'Loot 2x Ukun Hide', zone = 'GoD zones', nobackfill = true, count = 2, detect = { 'Ukun Hide' } },
                 { id = 's5', text = 'Tailoring 100, Brewing 122', zone = '-' },
                 { id = 's6', text = 'Brew Acid Wash', zone = '-',
                   notes = 'Jar of Acid + 3 Celestial Essence + Concentrated Celestial Solvent + 3 The Scent of Marr (PoK vendors).',
@@ -30,7 +31,7 @@ return {
             steps = {
                 { id = 's1', text = 'Farm 4 items', zone = 'various',
                   details = { 'Petrified Fangshrub: creek ground spawn, Riwwi', 'Roaring Grass: ground spawn in the castle, Plane of Disease', 'Taut Leather Swatch: 3 Blue Diamonds to Savage Lord Hunter, Gulf of Gunthak', "Wildspirit Tear: Ailing Walrus, Siren's Grotto (rare)" },
-                  nobackfill = true, detect = { 'Petrified Fangshrub', 'Roaring Grass', 'Taut Leather Swatch', 'Wildspirit Tear' } },
+                  nobackfill = true, all = true, detect = { 'Petrified Fangshrub', 'Roaring Grass', 'Taut Leather Swatch', 'Wildspirit Tear' } },
                 { id = 's2', text = 'Tailoring 100', zone = '-' },
                 { id = 's3', text = 'Items to Muada, sew Helm of the Feral, equip it, say "done"', zone = 'Shar Vahl', detect = { 'Letter from Muada' } },
                 { id = 's4', text = 'Show the letter around the world', zone = 'various',
@@ -67,7 +68,7 @@ return {
                 { id = 's1', text = 'Muada dialogue through "make the totem"', zone = 'Shar Vahl', detect = { 'Peculiar Unshapen Piece of Wood' } },
                 { id = 's2', text = 'Kill Spiritfrenzied Phoenix (Phoenix Island)', zone = 'Plane of Air', detect = { 'Fierce Spirit Clay' } },
                 { id = 's3', text = 'Hail Rashara Wrualla, kill Dismal Darkpaw Mystic', zone = 'Jaggedpine Forest', detect = { 'Scalding Blood' } },
-                { id = 's4', text = 'Kill Grimling General / Colonel for 2 medallions', zone = 'Grimling Forest', detect = { 'Eerie Medallion' } },
+                { id = 's4', text = 'Kill Grimling General / Colonel for 2 medallions', zone = 'Grimling Forest', count = 2, detect = { 'Eerie Medallion' } },
                 { id = 's5', text = 'Muada: "make the totem"', zone = 'Shar Vahl', detect = { "Elders' Totem Mold", 'Combined Essence' } },
                 { id = 's6', text = 'Baking, Blacksmithing, Pottery to 100', zone = '-' },
                 { id = 's7', text = 'Kiln, Oven, Forge combines', zone = 'Plane of Knowledge',

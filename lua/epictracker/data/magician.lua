@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Magician epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -58,7 +59,7 @@ return {
             steps = {
                 { id = 's1', text = 'Show 1.5 to Iilivina (-580, -250), "bantil", "power"', zone = "Dranik's Scar" },
                 { id = 's2', text = 'Loot 2x Pyrilen Essence (fire mobs) + 2x Gelidran Essence (ice mobs)', zone = "Riftseekers' Sanctum",
-                  nobackfill = true, detect = { 'Pyrilen Essence', 'Gelidran Essence' } },
+                  nobackfill = true, all = true, count = 2, detect = { 'Pyrilen Essence', 'Gelidran Essence' } },
                 { id = 's3', text = 'Essences to Iilivina', zone = "Dranik's Scar", detect = { 'Pouch of Powered Riftseeker Essence' } },
                 { id = 's4', text = 'Pouch + note to Bantil', zone = 'Plane of Knowledge', detect = { 'Small Pouch of Riftseeker Essence' } },
                 { id = 's5', text = 'Small pouch to Vornol Transon (tower top)', zone = 'Twilight Sea' },

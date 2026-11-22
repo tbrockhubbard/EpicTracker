@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Rogue epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 return {

@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Shadow Knight epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 
@@ -61,7 +62,7 @@ return {
                   detect = { "Skurza's Head" } },
                 { id = 's14', text = 'Four heads to Gilina (get the sword back)', zone = 'Plane of Knowledge' },
                 { id = 's15', text = 'Hail Tarnamil (+575, +1650), kill the 6 paladins', zone = 'Kithicor Forest',
-                  detect = { 'Paladin Blood Sample' } },
+                  count = 3, detect = { 'Paladin Blood Sample' } },
                 { id = 's16', text = 'Sword + 3x Paladin Blood Sample to Gilina', zone = 'Plane of Knowledge' },
                 { id = 's17', text = 'Hail and kill Sir Elmonious Falmont (-3200, -2300, hits 3000+)', zone = 'Western Wastes',
                   detect = { "Sir Elmonious's Holy Symbol" } },

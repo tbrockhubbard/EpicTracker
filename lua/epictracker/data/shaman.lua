@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Shaman epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 return {
@@ -47,7 +48,7 @@ return {
                 { id = 's2', text = 'Kimm McShannel (-950, +2250): "up to it", kill Ancient Megalodon, give her the seaweed', zone = 'Lake Rathetear',
                   detect = { 'Twine-Wrapped Lustrous Seaweed' } },
                 { id = 's3', text = 'Lupot Nukla (+655, +530): "no idea"; farm 2x Bleak Fungus (rare Shuddering Mushroom); hail Lupot', zone = 'Fungus Grove',
-                  detect = { 'Bleak Fungus' } },
+                  count = 2, detect = { 'Bleak Fungus' } },
                 { id = 's4', text = 'Tikl Huk (-1530, -1780): "elder spirit sent me", turn in 3x Twinkling Shrub', zone = 'Twilight Sea',
                   detect = { 'Tied Twinkling Shrubs' } },
                 { id = 's5', text = 'Yoppa Greenthumb (+275, +1060, underwater): "elder spirit sent me", kill 3 sharks', zone = 'Cobalt Scar',
@@ -75,11 +76,11 @@ return {
                 { id = 's18', text = 'Bangle to Kimm McShannel, say "break down"', zone = 'Lake Rathetear',
                   detect = { 'Heyokah Medicine Bag' } },
                 { id = 's19a', text = 'Loot 4x Revenant Tooth (sun revenants)', zone = 'The Grey',
-                  nobackfill = true, detect = { 'Revenant Tooth' } },
+                  nobackfill = true, count = 4, detect = { 'Revenant Tooth' } },
                 { id = 's19b', text = 'Loot 3x Perfect Marked Ukun Skin (Gutfeaster, Slavehunter, Fang)', zone = "Dranik's Scar",
-                  nobackfill = true, detect = { 'Perfect Marked Ukun Skin' } },
+                  nobackfill = true, count = 3, detect = { 'Perfect Marked Ukun Skin' } },
                 { id = 's19c', text = 'Loot 2x Corrosive Goo (pulsating bile)', zone = 'Howling Stones',
-                  nobackfill = true, detect = { 'Corrosive Goo' } },
+                  nobackfill = true, count = 2, detect = { 'Corrosive Goo' } },
                 { id = 's19d', text = 'Loot Corruption Powder (Elite Corrupted Knight)', zone = 'Crypt of Decay',
                   notes = 'Only drops once you have the Heyokah Medicine Bag and are on this step.',
                   detect = { 'Corruption Powder' } },
@@ -112,7 +113,7 @@ return {
                 { id = 's10', text = 'Kill Lightning Warrior Spiritseeker + adds', zone = 'Muramite Proving Grounds',
                   detect = { 'Glowing Trace of Might' } },
                 { id = 's11', text = 'Loot 2x Spirit-Touched Phased Spider Thorax (phase spiders)', zone = 'Dragon Necropolis',
-                  nobackfill = true, detect = { 'Spirit-Touched Phased Spider Thorax' } },
+                  nobackfill = true, count = 2, detect = { 'Spirit-Touched Phased Spider Thorax' } },
                 { id = 's12', text = 'Combine the 5 items in the Pouch of Spirit Dust', zone = '-',
                   detect = { 'Glowing Spirit Charm of Might' } },
                 { id = 's13', text = 'Charm to the Elder Spirit, "spiritcaller", "survive"', zone = 'West Freeport' },

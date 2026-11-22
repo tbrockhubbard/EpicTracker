@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Ranger epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: eqprogression.com (pre, 2.0), allakhazam (1.5). Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -49,7 +50,7 @@ return {
                       'Large Butterfly Net: Long Net Pole + Phase Netting',
                       'Eight-Loop Lasso: 8 Fibrous Rope (Golanda Nut + Smithy Hammer, skill 100)',
                   },
-                  detect = { 'Large Butterfly Net', 'Eight-Loop Lasso' } },
+                  all = true, detect = { 'Large Butterfly Net', 'Eight-Loop Lasso' } },
                 { id = 's4a', text = 'Net a Twitching Swordfish (-156, +75)', zone = "Siren's Grotto", detect = { 'Twitching Swordfish Blood Sample' } },
                 { id = 's4b', text = 'Net a Sickly Mosquito (+990, -55)', zone = 'Temple of Cazic-Thule', detect = { 'Sickly Mosquito Blood Sample' } },
                 { id = 's4c', text = 'Lasso a Bloated Drogan Spider (+450, +410)', zone = 'Temple of Droga', detect = { 'Bloated Drogan Spider Blood Sample' } },

@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Druid epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: eqprogression.com (pre, 2.0), allakhazam wiki (1.5). Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -37,7 +38,7 @@ return {
                       'Soggy: Blumblum Swigwater; kill Ulthork Raider for the totem; trigger fish in Tackle Box',
                       'Partially Digested: charmed alligator under Broken Bridge, Feerrott; kill Swamp Terror',
                   },
-                  detect = { "Handful of Diseased Maiden's Hair", "Bag of Diseased Maiden's Hair", "Soggy Maiden's Hair", "Partially Digested Maiden's Hair" } },
+                  all = true, detect = { "Handful of Diseased Maiden's Hair", "Bag of Diseased Maiden's Hair", "Soggy Maiden's Hair", "Partially Digested Maiden's Hair" } },
                 { id = 's3', text = 'Sealed Collection Bag to Niera; wash the Mangled Head', zone = 'Surefall Glade', detect = { 'Sealed Collection Bag', 'Wrapped Mangled Head' } },
                 { id = 's4', text = 'Soul Stone from the madman', zone = 'East Freeport / North Ro', detect = { 'Soul Stone' } },
                 { id = 's5', text = 'Fresh Awakenings Vol 1-3, Healing Plants to Niera', zone = 'Plane of Knowledge',

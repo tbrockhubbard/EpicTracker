@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Paladin epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: eqprogression.com (pre, 1.5), allakhazam (2.0). Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -19,7 +20,7 @@ return {
                 { id = 's3c', text = 'Kill Maestro of Rancor', zone = 'Plane of Hate' },
                 { id = 's4', text = 'Ground spawn 4 runes', zone = 'various',
                   details = { 'Rune of Xor: Plane of Tranquility', 'Rune of Yirno: Castle Mistmoore', 'Rune of Zota: Scarlet Desert', 'Rune Wilun: Gulf of Gunthak' },
-                  nobackfill = true, detect = { 'Rune of Xor', 'Rune of Yirno', 'Rune of Zota', 'Rune Wilun' } },
+                  nobackfill = true, all = true, detect = { 'Rune of Xor', 'Rune of Yirno', 'Rune of Zota', 'Rune Wilun' } },
                 { id = 's5', text = 'Rombus (LDoN camp): dialogue, give 4 runes for the 4th sword piece', zone = 'Everfrost' },
                 { id = 's6', text = 'Combine 4 Broken Sword Pieces + solvent in Gilfal\'s Scabbard', zone = '-',
                   detect = { 'Fractured Couragebringer' } },
@@ -38,7 +39,7 @@ return {
                 { id = 's4', text = 'Fishing to 100', zone = '-' },
                 { id = 's5', text = 'Fish 4x Corrupted Koalindl\'s Heart', zone = 'various',
                   details = { 'Gulf of Gunthak beach (-180, -640)', 'Ocean of Tears, Sister Isle dock (+1550, -7900)', 'The Overthere shore (+4000, -2250)', "Nedaria's Landing near Wayfarers Camp" },
-                  detect = { "Corrupted Koalindl's Heart" } },
+                  count = 4, detect = { "Corrupted Koalindl's Heart" } },
                 { id = 's6', text = '4 hearts to Enic Ruklin', zone = 'North Qeynos', detect = { 'Seal of Enic' } },
                 { id = 's7', text = 'Dry Sapara (VP zone-in): kill Rithnok the Tormented, give soulstone back', zone = 'Skyfire Mountains',
                   detect = { "Rithnok's Soulstone" } },
@@ -52,7 +53,7 @@ return {
                   detect = { "Bone Collector's Bag" } },
                 { id = 's12', text = '3x Dark Skeleton Remains (rare), combine in the bag', zone = 'various',
                   details = { 'The Grey: sun revenants near the lake', 'Umbral Plains: disturbed elysian remains (roam)', 'Ssraeshza Temple: basement skeletons' },
-                  nobackfill = true, detect = { 'Dark Skeleton Remains' } },
+                  nobackfill = true, count = 3, detect = { 'Dark Skeleton Remains' } },
                 { id = 's13', text = 'Bag to Denns Rootenpaw', zone = 'Dawnshroud Peaks', detect = { 'Enchanted Bone Powder' } },
                 { id = 's14', text = 'Powder to Drema Young, kill her', zone = 'Mons Letalis', detect = { "Drema's Soulstone" } },
                 { id = 's15', text = 'Kill Coterie Corruptor (castle top) for a Soulstone Shard', zone = 'Tenebrous Mountains' },
@@ -62,7 +63,7 @@ return {
                   detect = { "Lovine's Potion Bag" } },
                 { id = 's18', text = 'Farm 4 rare drops, combine in Lovine\'s Potion Bag', zone = 'GoD zones',
                   details = { 'Mastruq Havocblade Blood: mastruq havocblade, Qinimi', 'Noc Fleshfeasters Tail: noc fleshfeaster, Riwwi', 'Potameid Seaweed Strands: entrapped potamide, Natimbi', "Ra`Tuk Screambringer's Jaw: ra`tuk screambringer, Barindu" },
-                  nobackfill = true, detect = { 'Mastruq Havocblade Blood', 'Noc Fleshfeasters Tail', 'Potameid Seaweed Strands', "Ra`Tuk Screambringer's Jaw" } },
+                  nobackfill = true, all = true, detect = { 'Mastruq Havocblade Blood', 'Noc Fleshfeasters Tail', 'Potameid Seaweed Strands', "Ra`Tuk Screambringer's Jaw" } },
                 { id = 's19', text = 'Have a shaman make Mist of the Breathless (Alchemy 224)', zone = '-',
                   notes = 'Fine Potion Vial, Robust Shadow Essence (shades, Maiden\'s Eye/Akheva), Sage Leaf, Valerian Root, 3x Woundwart (Abysmal Sea vendors).',
                   nobackfill = true, detect = { 'Mist of the Breathless' } },
@@ -94,7 +95,7 @@ return {
                       'Greater Faydark: hail Guard Fayfear; Crushbone throne room Orc Messenger -> Orcish Battle Plans',
                       "Steamfont: give Bigilam Wantilans a Mana Battery - Class Six -> A Slain Vampire's Heart",
                   },
-                  detect = { 'Teir`Dal Blood Pact', "Signus' Vampire Fangs", 'Orcish Battle Plans', "A Slain Vampire's Heart" } },
+                  all = true, detect = { 'Teir`Dal Blood Pact', "Signus' Vampire Fangs", 'Orcish Battle Plans', "A Slain Vampire's Heart" } },
                 { id = 's3', text = 'Combine in Galrun\'s Bag, give to Galrun; "I am ready to fight Valdoon" (raid)', zone = 'North Felwithe / Mistmoore Catacombs',
                   detect = { "Valdoon Kel`Novar's Heart" } },
                 { id = 's4', text = 'Heart to Galrun', zone = 'North Felwithe', detect = { 'Token of Cleansing' } },

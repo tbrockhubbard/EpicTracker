@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Bard epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: allakhazam (pre, 2.0), eqprogression (1.5). Live steps; verify on Lazarus.
 return {
@@ -43,7 +44,7 @@ return {
                 { id = 's2a', text = 'Kill excavators until Excavator Quellin, then Tarn Macklin (+1500, -550)', zone = 'Dragon Necropolis',
                   detect = { 'Cracked Dragon Bone' } },
                 { id = 's2b', text = 'Ground spawn bones: Wing (+1600, +1000), Claw (+900, -600), Tail (-180, -1600)', zone = 'Dragon Necropolis',
-                  nobackfill = true, detect = { 'Dragon Wing Bone', 'Dragon Claw Bone', 'Dragon Tail Bone' } },
+                  nobackfill = true, all = true, detect = { 'Dragon Wing Bone', 'Dragon Claw Bone', 'Dragon Tail Bone' } },
                 { id = 's3', text = "Show Cracked Dragon Bone to Lantaric`Dar (-420, +4000)", zone = 'Wakening Lands' },
                 { id = 's4', text = "4 bones to Hsagra's Shade (-265, -2700), kill Marijakin then the Abomination", zone = 'Dragon Necropolis',
                   notes = 'Kill Marijakin within ~3.5 min.', detect = { 'Blackened Dragon Bone' } },

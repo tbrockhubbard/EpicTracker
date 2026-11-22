@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Enchanter epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -11,7 +12,7 @@ return {
             steps = {
                 { id = 's1', text = 'A bloodgill mimic (underwater by Veksar): "Hail", "who is he", "master"', zone = 'Lake of Ill Omen' },
                 { id = 's2', text = '4x Dragon Boneshard to Spirit of Garudon, kill the dragon, loot 4 more', zone = 'Veksar',
-                  nobackfill = true, detect = { 'Dragon Boneshard' } },
+                  nobackfill = true, count = 4, detect = { 'Dragon Boneshard' } },
                 { id = 's3', text = '4 boneshards to Spirit of Garudon, kill Garudon', zone = 'Veksar', detect = { "Garudon's Statue" } },
                 { id = 's4', text = 'Statue to the bloodgill mimic, "aida", "where is she"', zone = 'Lake of Ill Omen' },
                 { id = 's5', text = 'Kill A Shissar Lorekeeper', zone = 'Ssraeshza Temple', nobackfill = true, detect = { 'Crumbling Tome' } },
@@ -19,7 +20,7 @@ return {
                   detect = { 'Illegible Tome' } },
                 { id = 's7', text = '6x Fine Insidious items from forsaken revenants', zone = 'Plane of Hate',
                   notes = 'Gloves, Halo, Manacle, Pantaloons, Sleeves, Slippers.',
-                  nobackfill = true, detect = { 'Fine Insidious Gloves', 'Fine Insidious Halo', 'Fine Insidious Manacle', 'Fine Insidious Pantaloons', 'Fine Insidious Sleeves', 'Fine Insidious Slippers' } },
+                  nobackfill = true, all = true, detect = { 'Fine Insidious Gloves', 'Fine Insidious Halo', 'Fine Insidious Manacle', 'Fine Insidious Pantaloons', 'Fine Insidious Sleeves', 'Fine Insidious Slippers' } },
                 { id = 's8', text = 'Rilgor Plegnog: "insidious", combine in satchel, give bundle', zone = "Ak'Anon", detect = { 'Gnomish Translating Device' } },
                 { id = 's9', text = 'Device + Illegible Tome to a sarnak imitator', zone = 'Burning Woods', detect = { 'Tattered Illegible Tome' } },
             },
@@ -34,7 +35,7 @@ return {
                       'Najena: table in the jail', 'Temple of Cazic-Thule', 'Skyshrine: orb room, first door left',
                       "Velketor's Labyrinth: upper kobold camp", 'Crystal Caverns: Queen Dracnia', "Fungus Grove: Shik'nar caves", 'Crypt of Nadox: on a table',
                   },
-                  nobackfill = true, detect = { 'Cryptic Page' } },
+                  nobackfill = true, count = 10, detect = { 'Cryptic Page' } },
                 { id = 's3', text = 'Combine pages in the Tattered Illegible Tome', zone = '-', detect = { 'Complete Illegible Tome' } },
                 { id = 's4', text = 'Show tome to the sarnak imitator', zone = 'Burning Woods' },
                 { id = 's5', text = 'Grand Librarian Maelin: "jeb"; note to Illusionist Lobaen', zone = 'Plane of Knowledge', detect = { 'Sealed Documents' } },
@@ -76,7 +77,7 @@ return {
                 { id = 's5', text = 'Blood to Vohnkare (+770, -2470)', zone = 'Western Wastes' },
                 { id = 's6', text = 'Buy 4 Faydwer goods', zone = 'Faydwer',
                   details = { "Gnomish Candy: Clockwork Merchant, Ak'Anon", 'Koada`Dal Silk: Merchant Tyslin, N. Felwithe', 'Feir`Dal Champagne: Innkeep Anisyla, Kelethin', 'Dwarven Steel: Gretta Mottle, S. Kaladim' },
-                  nobackfill = true, detect = { 'Gnomish Candy', 'Koada`Dal Silk', 'Feir`Dal Champagne', 'Dwarven Steel' } },
+                  nobackfill = true, all = true, detect = { 'Gnomish Candy', 'Koada`Dal Silk', 'Feir`Dal Champagne', 'Dwarven Steel' } },
                 { id = 's7', text = 'Kill Miriku the Chaotic (behind Derakor)', zone = 'Kael Drakkel', nobackfill = true, detect = { 'Harnessing Stone' } },
                 { id = 's8', text = 'Brownie noble (+1870, +3080): 4 goods, then Harnessing Stone', zone = 'Lesser Faydark' },
                 { id = 's9', text = 'Feyana Lightwing: hail, "crystal", "favor"', zone = 'Greater Faydark' },

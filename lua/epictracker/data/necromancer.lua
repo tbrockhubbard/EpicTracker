@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Necromancer epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -26,12 +27,12 @@ return {
             steps = {
                 { id = 's1', text = 'Hail Kazen Fecae (+340, -1600) for the note (skip if pre-quest done)', zone = 'Lake Rathetear' },
                 { id = 's2', text = 'Note to Biddliss Sperandu (+400, -1140)', zone = 'Steamfont Mountains', detect = { 'Gleaming Ore Satchel' } },
-                { id = 's3', text = 'Loot 4x Gleaming Zraxthril Ore (south side)', zone = 'Torgiran Mines', nobackfill = true, detect = { 'Gleaming Zraxthril Ore' } },
+                { id = 's3', text = 'Loot 4x Gleaming Zraxthril Ore (south side)', zone = 'Torgiran Mines', nobackfill = true, count = 4, detect = { 'Gleaming Zraxthril Ore' } },
                 { id = 's4', text = 'Combine ore in the satchel', zone = '-', detect = { 'Sealed Ore Satchel' } },
                 { id = 's5', text = 'Sealed satchel to Biddliss', zone = 'Steamfont Mountains', detect = { "Biddliss's Research Tools" } },
                 { id = 's6', text = 'Tools to Kazen Fecae', zone = 'Lake Rathetear', detect = { 'Drawing of Rune' } },
                 { id = 's7', text = 'Drawing to Ruandia, instructions to Tebarin', zone = 'Plane of Knowledge', detect = { "Ruandia's Instructions", 'Intricately Carved Box' } },
-                { id = 's8', text = 'Loot 2x Ball of Elemental Clay', zone = 'The Hole / Plane of Earth', nobackfill = true, detect = { 'Ball of Elemental Clay' } },
+                { id = 's8', text = 'Loot 2x Ball of Elemental Clay', zone = 'The Hole / Plane of Earth', nobackfill = true, count = 2, detect = { 'Ball of Elemental Clay' } },
                 { id = 's9', text = 'Combine clay in the box, give to Tebarin', zone = 'Plane of Knowledge', detect = { 'Strange Smelling Oil' } },
                 { id = 's10', text = 'Kill old gargoyle (rare, city rooftops)', zone = 'The Hole', nobackfill = true, detect = { 'Ancient Tome of Lost Lore' } },
                 { id = 's11', text = 'Combine tome + oil in the box', zone = '-', detect = { 'Protected Tome' } },
@@ -43,7 +44,7 @@ return {
                 { id = 's16', text = 'Box to Tebarin', zone = 'Plane of Knowledge', detect = { 'Paladin Headhunting Satchel' } },
                 { id = 's17', text = 'Kill the 4 Karana paladins (roam)', zone = 'Karanas',
                   details = { "East: Sir Gregon Sulltor -> Sir Gregon's Head", "North: Sir Gerwin Thunderblade -> Sir Gerwin's Head", "West: Sir Arlindo Goldheart -> Sir Arlindo's Head", "South: Sir Telian Mottsworth -> Sir Telian's Head" },
-                  nobackfill = true, detect = { "Sir Gregon's Head", "Sir Gerwin's Head", "Sir Arlindo's Head", "Sir Telian's Head" } },
+                  nobackfill = true, all = true, detect = { "Sir Gregon's Head", "Sir Gerwin's Head", "Sir Arlindo's Head", "Sir Telian's Head" } },
                 { id = 's18', text = 'Combine heads in the satchel, give to Tebarin', zone = 'Plane of Knowledge', detect = { 'Orb of Deathspeaking' } },
                 { id = 's19', text = 'Whiahdi (+400, -930): say "staff"', zone = 'Natimbi' },
                 { id = 's20', text = 'Taiandao (+360, -120): "Hail", "killed whiahdi", kill Viarglug', zone = 'Barindu', detect = { "Whiahdi's Earthly Possessions" } },

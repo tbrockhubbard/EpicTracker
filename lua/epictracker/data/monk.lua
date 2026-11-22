@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Monk epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -27,7 +28,7 @@ return {
                 { id = 's3', text = 'Researcher Relreom (+375, +1205): "important book", "pages"', zone = 'Shadowhaven' },
                 { id = 's4', text = '4x Section of Parchment ground spawns', zone = 'various',
                   details = { 'Akheva Ruins: hallway', 'Gulf of Gunthak: inside crashed boat', 'Howling Stones: rock pile under zone-in, north room', 'The Hole: city area' },
-                  nobackfill = true, detect = { 'Section of Parchment' } },
+                  nobackfill = true, count = 4, detect = { 'Section of Parchment' } },
                 { id = 's5', text = 'Parchments to Relreom', zone = 'Shadowhaven', detect = { "Danl's Missing Book" } },
                 { id = 's6', text = 'Book to Tomekeeper Danl (library 2nd floor)', zone = 'Erudin' },
                 { id = 's7', text = 'Vortix: "where is kaiarens diary"', zone = 'Lake Rathetear' },
@@ -44,7 +45,7 @@ return {
                 { id = 's15', text = 'Eryke Stremstin: letter, Mark of Justice, 1000pp', zone = 'The Bazaar', detect = { 'Celestial Thread' } },
                 { id = 's16', text = 'Pottery 140+, make Divine Crystallized Glaze, polish the 3 symbols in a Kiln', zone = '-',
                   notes = 'Make 5+ glaze total; the 2.0 needs 2 more. Glaze: Iron Oxide + Permafrost Crystals + Water Flask + White Lead in a Glaze Mortar.',
-                  detect = { 'Polished Symbol of Order', 'Polished Symbol of Sun', 'Polished Symbol of Moon' } },
+                  all = true, detect = { 'Polished Symbol of Order', 'Polished Symbol of Sun', 'Polished Symbol of Moon' } },
                 { id = 's17', text = 'Tailoring 66+, sew 3 polished symbols + Belt Pattern + Celestial Thread', zone = '-',
                   notes = 'KEEP the sash, it is needed for 2.0.', detect = { "Initiate's Sash of Celestial Order" } },
                 { id = 's18', text = 'Show sash to Vortix: "journey", "kaiaren\'s being", "place"', zone = 'Plane of Tranquility' },
@@ -70,7 +71,7 @@ return {
                 { id = 's7', text = 'Disciple of Focus (-230, +900): hail, "challenge", kill', zone = 'Tenebrous Mountains', detect = { 'Symbol of Focus' } },
                 { id = 's8', text = 'Disciple of Tranquility (+75, -1550): hail, "battle", kill', zone = 'Plane of Valor', detect = { 'Symbol of Tranquility' } },
                 { id = 's9', text = 'Polish both symbols with Divine Crystallized Glaze in a Kiln', zone = '-',
-                  detect = { 'Polished Symbol of Focus', 'Polished Symbol of Tranquility' } },
+                  all = true, detect = { 'Polished Symbol of Focus', 'Polished Symbol of Tranquility' } },
                 { id = 's10', text = 'Kaiaren: 2 polished symbols + sash, "final task", "ready to begin", kill (raid)', zone = 'Ocean of Tears' },
                 { id = 's11', text = 'Loot Globe of Discordant Energy (raid)', zone = 'Anguish', nobackfill = true, detect = { 'Globe of Discordant Energy' } },
                 { id = 's12', text = 'Show Globe + 1.5 to Vortix', zone = 'Plane of Tranquility' },

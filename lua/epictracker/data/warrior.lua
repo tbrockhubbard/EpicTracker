@@ -1,3 +1,4 @@
+-- EpicTracker v1.5.0 (2026-11-22)
 -- Warrior epic data. See docs/DATA_FORMAT.md for the step format.
 -- Source: eqprogression.com. Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
@@ -44,7 +45,7 @@ return {
                 { id = 's1', text = 'Korbuk Brimblade: hail, full dialogue, say "thing"', zone = "Dranik's Scar" },
                 { id = 's2', text = 'Ground spawn the 4 Decomposing pages/cover', zone = "Dranik's Scar",
                   notes = 'Decomposing Page I, II, III and Decomposing Cover. Grab Blackfall Ore if you see it.',
-                  detect = { 'Decomposing Page I', 'Decomposing Page II', 'Decomposing Page III', 'Decomposing Cover' } },
+                  all = true, detect = { 'Decomposing Page I', 'Decomposing Page II', 'Decomposing Page III', 'Decomposing Cover' } },
                 { id = 's3', text = 'Show the 4 items to Korbuk', zone = "Dranik's Scar" },
                 { id = 's4', text = 'Give the 4 items to Rewina Jalmoy (ship deck)', zone = 'Abysmal Sea',
                   detect = { 'Recounted History of War' } },
@@ -91,7 +92,7 @@ return {
                       'NE Eye: Wall of Slaughter, kill Dragorn Champion (mini raid)',
                       'SE Eye: Muramite Proving Grounds ground spawn (-3770, -720)',
                   },
-                  detect = { 'Stone of Eternal Power: Northwest Eye', 'Stone of Eternal Power: Southwest Eye', 'Stone of Eternal Power: Northeast Eye', 'Stone of Eternal Power: Southeast Eye' } },
+                  all = true, detect = { 'Stone of Eternal Power: Northwest Eye', 'Stone of Eternal Power: Southwest Eye', 'Stone of Eternal Power: Northeast Eye', 'Stone of Eternal Power: Southeast Eye' } },
                 { id = 's24', text = 'Show the 4 eyes to Korbuk', zone = "Dranik's Scar" },
                 { id = 's25', text = 'Get Spell: Fire and a Gemming Tool', zone = 'various',
                   notes = 'Spell: Fire from Tisiana (Lavastorm Druid Rings). Gemming Tool: Blacksmithing 115 (Gemming Mold + 2 High Quality Metal Bits + 2 Small Piece of High Quality Ore + Water Flask).',
