@@ -1,7 +1,15 @@
 <!-- EpicTracker v1.6.0 (2026-11-22) -->
 # EpicTracker
 
+**Any Questions?  Give Ougabouga a tell in game, or on the Lazarus Project Discord Server.**
+
 **Track every character's Epic 1.5 pre-quest, Epic 1.5 and Epic 2.0 from one window.**
+**v1.5.0 Added PoP Flagging.  Added automation to detect flags at Seer Mal Nae'Shi.**
+**v1.6.0 Added Version Updater.  This lua can be updated in game, no need for restarting or revisiting this github.  Improvement logs are listed before you download.  It's pretty nifty.**
+
+I'm guilty of improperly documenting this, I'm making improvements on the fly as I go.  I'm doing the quests as I go, and testing the lua along the way.  Expect small differences, due to live being different from Project Lazarus.  This project is geared towards Project Lazarus only, and improvements will trickle through as I go.  As the program improves and is finalized, so will the documentation be.  
+
+
 
 EpicTracker is a MacroQuest Lua script for EverQuest boxers. Each character watches its own inventory and bank, ticks off epic steps as quest items show up, and reports to your main. You see your whole group's epic progress at a glance: who is on which step, what to do next, and where.
 
