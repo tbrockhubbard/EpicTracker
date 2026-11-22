@@ -1,4 +1,4 @@
--- EpicTracker v1.5.0 (2026-11-22)
+-- EpicTracker v1.6.0 (2026-11-22)
 -- Guild Lazarus item link library.
 --
 -- Links here come from real Project Lazarus items, so they show the server's own

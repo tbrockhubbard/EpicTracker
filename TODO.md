@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.5.0 (2026-11-22) -->
+<!-- EpicTracker v1.6.0 (2026-11-22) -->
 # TODO
 
 The working list for the tracker. Tick items off as they land, and note the version they shipped in.
@@ -23,14 +23,10 @@ Going all-in on Project Lazarus: epics, flags, keys and custom progression in on
 - [ ] Keep `/epictracker` working for a while as an alias
 
 ### Seer logs (needed for flag auto-detection)
-Process: `/log on`, sit near the Seer in the Plane of Knowledge, say "guided meditation", then send the log (`Logs\eqlog_<name>_<server>.txt`).
-- [ ] Shadow Knight
-- [ ] Shaman
-- [ ] Cleric
-- [ ] Rogue
-- [ ] Bard
-- [ ] Berserker
-- [ ] Map each Seer line to a flag (Lazarus wording may differ from live)
+Process: `/log on`, stand by Seer Mal Nae`Shi in the Plane of Knowledge, say "guided meditation" then "unlock memories", then send the log (`Logs\eqlog_<name>_<server>.txt`).
+- [x] One log covers every class: "unlock memories" lists all 50 PoP lines, done or NOT (2026-11-22)
+- [x] Map each Seer line to a flag (v1.6.0, `seer` field in `flags/pop.lua`)
+- [ ] Capture the "You have ..." (done) wording for more flags as characters earn them; so far only the Grummus and Adler Fuirstel lines are confirmed in the done form
 - [ ] List the custom Lazarus flag NPCs: name, zone, what to say, what they report
 - [ ] **Gram Dunnar (PoK) as an auto-detector**: log what he says on "stories" and use it to tick PoP flags and clear the "stories due" reminder automatically
 - [ ] Get logs from each custom flag NPC
@@ -48,7 +44,8 @@ The wiki blocks automated tools, so pages come in as PDFs.
 
 ### Flags
 - [x] Planes of Power: full flag list from the Lazarus wiki, manual ticks + item detection (v1.3.0)
-- [ ] Planes of Power: Seer / Gram Dunnar auto-detection (needs logs)
+- [x] Planes of Power: Seer auto-detection (v1.6.0)
+- [ ] Planes of Power: Gram Dunnar auto-detection (needs a "stories" log)
 - [ ] Confirm in game that keyring keys (Passkey of the Twelve, Talisman of Thunderous Foyer, Lxanvom key) are detected
 - [ ] Confirm the PoP key item names: A Screaming Sphere, Crystalline Globe, Symbol of Torden
 - [ ] Gates of Discord
@@ -58,7 +55,8 @@ The wiki blocks automated tools, so pages come in as PDFs.
 - [x] Who-has-what grid, steps down the side and characters across (v1.3.0)
 - [x] Per-character checklist view, with a toggle between the two (v1.3.0)
 - [ ] Pick a favorite view (grid vs checklist) after using both; maybe remember the choice
-- [ ] "Ask the Seer" button: the whole group targets her and says "guided meditation"
+- [x] "Ask the Seer" button: the whole group targets her and says "guided meditation" + "unlock memories" (v1.6.0)
+- [ ] Test Ask the Seer in game on main + boxes (only tested in a simulation with a real log)
 
 ### New-player help
 - [ ] Starter checklist for new guildies (currencies, starter gear quests, leveling path)
@@ -66,7 +64,7 @@ The wiki blocks automated tools, so pages come in as PDFs.
 ## In-game updater
 
 - [x] Updates button: check GitHub Releases, install for all boxes, restart (v1.5.0)
-- [ ] Publish v1.5.0 as the first GitHub Release (tag `v1.5.0`) so the button has something to find
+- [ ] Publish the first GitHub Release so the button has something to find
 - [ ] Test in game: Check, Install, restart on main and boxes (only tested in a simulation so far)
 - [ ] Check whether the minimized command window during a check is annoying; if so, look at a hidden launcher
 

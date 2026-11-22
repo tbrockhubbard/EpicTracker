@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.5.0 (2026-11-22) -->
+<!-- EpicTracker v1.6.0 (2026-11-22) -->
 # EpicTracker
 
 **Track every character's Epic 1.5 pre-quest, Epic 1.5 and Epic 2.0 from one window.**
@@ -14,7 +14,7 @@ Built for **Project Lazarus** (Omens of War era, E3Next boxing). It should work 
 ## Features
 
 - **All 16 classes:** Bard, Beastlord, Berserker, Cleric, Druid, Enchanter, Magician, Monk, Necromancer, Paladin, Ranger, Rogue, Shadow Knight, Shaman, Warrior and Wizard. Each has three tiers (1.5 pre-quest, 1.5, 2.0), about 700 steps in all.
-- **Planes of Power flags:** a PoP Flags tab with every flag for the Intricate Wooden Figurine (Lazarus "Storytime" quest), in a who-has-what grid or a per-character checklist, plus a reminder of who still needs to say "stories" to Gram Dunnar.
+- **Planes of Power flags:** a PoP Flags tab with every flag for the Intricate Wooden Figurine (Lazarus "Storytime" quest), in a who-has-what grid or a per-character checklist, plus a reminder of who still needs to say "stories" to Gram Dunnar. **Ask the Seer** reads every character's flags straight from Seer Mal Nae`Shi in the Plane of Knowledge.
 - **Clickable items:** click any item name (rewards, quest items) to open the in-game item window. Links come from your own characters first, so they show Lazarus's real stats. A guild-built Lazarus link library covers the rest, with MQ2LinkDB as a last resort.
 - **Update LinkDB button:** item links not working? One click pulls the MQ2LinkDB item list.
 - **Auto-detection:** steps tick off when the key item is in your inventory or bank. Steps that need several items count them and show partial progress (`2/4`). Holding a later item also completes the earlier steps. Steps stay checked after you hand the item in.
@@ -78,6 +78,7 @@ Using DanNet instead of E3? Use `/dgga /lua run epictracker bg`, and change `GRO
 | `/epictracker scan` | Rescan inventory and bank now |
 | `/epictracker refresh` | Ask every box to report in |
 | `/epictracker group` | Start the script on the whole group |
+| `/epictracker seer` | Ask Seer Mal Nae`Shi for PoP flags on every character (same as the Ask the Seer button) |
 | `/epictracker update` | Check GitHub for a new version (same as the Updates button) |
 | `/epictracker updatelinkdb` | Pull the MQ2LinkDB item list (same as the Update LinkDB button) |
 | `/epictracker exportlinks` | Export your collected Lazarus item links for the guild library |
@@ -87,7 +88,8 @@ Using DanNet instead of E3? Use `/dgga /lua run epictracker bg`, and change `GRO
 ### Tips
 
 - **Open your bank once per session** on each character. MacroQuest only knows bank contents after the bank has been opened.
-- Steps with no item to detect (dialogue, flags, skill-ups) are checked by hand. Click the checkbox.
+- Steps with no item to detect (dialogue, skill-ups) are checked by hand. Click the checkbox.
+- **PoP flags:** stand your group next to Seer Mal Nae`Shi in the Plane of Knowledge and click **Ask the Seer** on the PoP Flags tab. Every character running the tracker targets her, says "guided meditation" and "unlock memories", and her answer ticks (and unticks) its flags. Those show a purple `seer` tag. Talking to her by hand works too.
 - Progress is saved per character in `MacroQuest/config/epictracker_<server>_<name>.lua`.
 
 ## Accuracy, and how you can help

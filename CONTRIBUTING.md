@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.5.0 (2026-11-22) -->
+<!-- EpicTracker v1.6.0 (2026-11-22) -->
 # Contributing
 
 The most useful help is **checking steps against Project Lazarus**. The data came from live-server guides, and Lazarus has tweaked epics.

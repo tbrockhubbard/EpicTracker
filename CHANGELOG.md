@@ -1,5 +1,19 @@
-<!-- EpicTracker v1.5.0 (2026-11-22) -->
+<!-- EpicTracker v1.6.0 (2026-11-22) -->
 # Changelog
+
+## 1.6.0 (2026-11-22)
+
+- **Ask the Seer.** New button on the PoP Flags tab (also `/epictracker seer`). Stand your group next to Seer Mal Nae`Shi in the Plane of Knowledge and click it: every character running the tracker targets her, says "guided meditation", then "unlock memories", and her answer ticks its PoP flags.
+  - Her answer lists every flag as "You have..." or "You have NOT...", so it also **unticks** flags that were ticked by mistake, and item detection won't re-tick them. Ticking a box by hand afterwards still wins until you ask her again.
+  - Seer-confirmed flags show a purple `seer` tag. The summary shows when each character last checked.
+  - Talking to her by hand works too: the tracker listens for her answer either way.
+  - Each box reports a one-line summary to your main's MQ console. Any line the tracker doesn't recognise is printed so it can be added.
+- **PoP data from the Seer** (her exact wording from a Lazarus log):
+  - New steps the Seer tracks but the wiki page doesn't list: the Plane of Innovation dragon, part one of Askr's task (Storms), and speaking with the grand librarian for Elemental Planes access. They count in progress but not toward Figurine stories.
+  - The six Plane of Justice trials are listed as optional rows, so you can see which trial each character did.
+  - **Fix:** the Plane of Nightmare pre-flag keyword is "tormented by nightmares" (the wiki said "tortured").
+  - The second Fuirstel hail after Bertoxxulous: the wiki says Elder Fuirstel, the Seer says Adler Fuirstel. The step now notes both.
+- New `seer` field for flag steps, documented in `docs/DATA_FORMAT.md`.
 
 ## 1.5.0 (2026-11-22)
 

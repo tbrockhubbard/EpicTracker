@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.5.0 (2026-11-22) -->
+<!-- EpicTracker v1.6.0 (2026-11-22) -->
 # Step data format
 
 Each class lives in `lua/epictracker/data/<class>.lua` and returns one Lua table.
@@ -82,6 +82,7 @@ return {
 - Section `id` includes the set prefix (`pop.dis`), so save keys look like `pop.dis.s1`. **Never rename or reuse them.**
 - `flag = true`: the step gives "You've received a character flag!". These count toward the Figurine "stories due" reminder.
 - `optional = true`: raid keys only one person needs. Shown, but not counted in progress.
+- `seer = '...'`: the line Seer Mal Nae`Shi gives for this step when you say "unlock memories", without the leading "You have " / "You have NOT ". Copy it from a real log (case and the trailing period don't matter). "You have" ticks the step, "You have NOT" unticks it, and item detection won't re-tick a step the Seer says is not done. Lines the tracker doesn't recognise are printed in the MQ console so they can be added.
 - Flags don't backfill, because Lazarus flags can be done in any order. Detection only ticks the step whose item is found.
 - All the normal step fields work (`detect`, `count`, `all`, `notes`, `details`, `url`).
 

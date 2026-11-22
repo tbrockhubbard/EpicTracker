@@ -1,4 +1,4 @@
--- EpicTracker v1.5.0 (2026-11-22)
+-- EpicTracker v1.6.0 (2026-11-22)
 -- Bard epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: allakhazam (pre, 2.0), eqprogression (1.5). Live steps; verify on Lazarus.
 return {

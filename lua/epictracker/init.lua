@@ -1,4 +1,4 @@
--- EpicTracker v1.5.0 (2026-11-22)
+-- EpicTracker v1.6.0 (2026-11-22)
 --[[
   EpicTracker - tracks Epic 1.5 pre-quest, Epic 1.5 and Epic 2.0 progress
   across all your boxed characters.
@@ -6,7 +6,7 @@
   Main character:   /lua run epictracker           (with window)
   Whole group:      /e3bcga /lua run epictracker bg (bots report in, no window)
                     or press "Start on group" in the window / type /epictracker group
-  Slash command:    /epictracker [show|hide|scan|refresh|group|update|updatelinkdb|exportlinks|quit|quitall]
+  Slash command:    /epictracker [show|hide|scan|refresh|group|seer|update|updatelinkdb|exportlinks|quit|quitall]
 
   Progress is saved per character in your MQ config folder and shared between
   clients with MQ's built-in actors messaging. E3 is only used to launch it.
@@ -17,11 +17,17 @@ local ImGui = require('ImGui')
 local actors = require('actors')
 
 local SCRIPT = 'epictracker'
-local VERSION = '1.5.0'
+local VERSION = '1.6.0'
 
 -- Command used to send a command to every character in the group.
 -- Project Lazarus + E3Next: /e3bcga (all, including you). DanNet users: /dgga
 local GROUP_CMD = '/e3bcga'
+
+-- PoP flag check: Seer Mal Nae`Shi in the Plane of Knowledge. "Ask the Seer" makes every
+-- character target her and say these two phrases; her "unlock memories" answer ticks flags.
+local SEER_NAME = 'Mal Nae'          -- part of her name, to pick her out of the Seers
+local SEER_PHRASES = { 'guided meditation', 'unlock memories' }
+local SEER_FAR = 50                  -- warn (but still try) beyond this distance
 
 -- Lazarus wiki (toolbar button)
 local WIKI_URL = 'https://www.lazaruseq.com/'
@@ -115,7 +121,8 @@ end
 ---------------------------------------------------------------------------
 -- schema 2 (v1.1.0): item counts. Older saves are checked once on load.
 local SCHEMA = 2
-local state = { done = {}, auto = {}, progress = {}, schema = SCHEMA, stories = {}, links = {} }
+-- seer[key] = true/false: what the Seer last said about that flag. seerAt[set] = when.
+local state = { done = {}, auto = {}, progress = {}, schema = SCHEMA, stories = {}, links = {}, seer = {}, seerAt = {} }
 local knownLinks, linksDirty = {}, false
 local dirty, needBroadcast, running = false, false, true
 
@@ -128,6 +135,8 @@ local function loadState()
         state.auto = t.auto or {}
         state.schema = t.schema or 1
         state.stories = t.stories or {}
+        state.seer = t.seer or {}
+        state.seerAt = t.seerAt or {}
     end
 end
 
@@ -153,10 +162,12 @@ local function learnLink(name, link)
 end
 
 local function saveState()
-    mq.pickle(savePath, { done = state.done, auto = state.auto, schema = state.schema, stories = state.stories })
+    mq.pickle(savePath, { done = state.done, auto = state.auto, schema = state.schema, stories = state.stories,
+        seer = state.seer, seerAt = state.seerAt })
 end
 
 local function setStep(key, value)
+    state.seer[key] = nil   -- a hand tick overrides the Seer until she's asked again
     if value then
         state.done[key] = true
     else
@@ -338,7 +349,8 @@ local function scan()
         for _, sec in ipairs(fdata and fdata.sections or {}) do
             for _, step in ipairs(sec.steps) do
                 local key = stepKey(sec, step)
-                if step.detect then
+                -- The Seer knows better than the inventory: if she said NOT, don't re-tick it.
+                if step.detect and state.seer[key] ~= false then
                     local met, have, need = stepProgress(step)
                     if met then
                         if markAuto(key) then changed = true end
@@ -444,6 +456,7 @@ end
 ---------------------------------------------------------------------------
 local peers = {}
 local mailbox
+local seerAsk = false   -- set by the button or a box message; run from the main loop
 
 local function send(msg)
     msg.server = server
@@ -451,15 +464,140 @@ local function send(msg)
     if mailbox then mailbox:send({ mailbox = SCRIPT }, msg) end
 end
 
+---------------------------------------------------------------------------
+-- Seer Mal Nae`Shi (PoK): "unlock memories" lists every PoP flag as
+--   "You have <line>."  or  "You have NOT <line>."
+-- Each flag step carries its line in `seer`. Her answer starts with
+-- "At the moment, your credit is as follows"; we only listen for a few seconds after that,
+-- so it also works when you talk to her by hand.
+---------------------------------------------------------------------------
+local function normSeer(s)
+    s = tostring(s or ''):lower():gsub('%s+', ' '):gsub('^ ', ''):gsub('[ %.]+$', '')
+    return s
+end
+
+local seerIndex
+local function getSeerIndex()
+    if seerIndex then return seerIndex end
+    seerIndex = {}
+    for _, fid in ipairs(FLAG_SETS) do
+        local fdata = getFlagData(fid)
+        for _, sec in ipairs(fdata and fdata.sections or {}) do
+            for _, st in ipairs(sec.steps) do
+                if st.seer then seerIndex[normSeer(st.seer)] = { set = fid, key = stepKey(sec, st) } end
+            end
+        end
+    end
+    return seerIndex
+end
+
+local seerRead = nil   -- { untilT, have, havenot, ticked, unticked, unknown = {} } while her answer comes in
+
+local function seerNote(text)
+    printf('\ag[EpicTracker]\ax %s', text)
+    if headless then send({ type = 'seernote', text = text }) end
+end
+
+local function onSeerStart()
+    seerRead = { startT = os.time(), untilT = os.time() + 8, have = 0, havenot = 0, ticked = 0, unticked = 0, unknown = {}, sets = {} }
+end
+
+local function onSeerLine(_, rest)
+    if not seerRead or os.time() > seerRead.untilT then return end
+    local have, txt = true, rest or ''
+    if txt:sub(1, 4) == 'NOT ' then have, txt = false, txt:sub(5) end
+    local hit = getSeerIndex()[normSeer(txt)]
+    if not hit then
+        -- Her lines all arrive in one burst; later "You have ..." lines are ordinary game text.
+        if os.time() <= seerRead.startT + 1 then
+            seerRead.unknown[#seerRead.unknown + 1] = (have and 'You have ' or 'You have NOT ') .. txt
+        end
+        return
+    end
+    local key = hit.key
+    seerRead.sets[hit.set] = true
+    state.seer[key] = have
+    if have then
+        seerRead.have = seerRead.have + 1
+        if not state.done[key] then seerRead.ticked = seerRead.ticked + 1 end
+        state.done[key] = true
+    else
+        seerRead.havenot = seerRead.havenot + 1
+        if state.done[key] then seerRead.unticked = seerRead.unticked + 1 end
+        state.done[key] = nil
+    end
+    state.auto[key] = nil
+end
+
+-- Called from the main loop once her answer is over.
+local function finishSeerRead()
+    if not seerRead or os.time() <= seerRead.untilT then return end
+    local r = seerRead
+    seerRead = nil
+    if r.have + r.havenot == 0 and #r.unknown == 0 then return end
+    for fid in pairs(r.sets) do state.seerAt[fid] = os.time() end
+    saveState()
+    dirty = true
+    local msg = string.format('Seer: %d of %d PoP flags done', r.have, r.have + r.havenot)
+    local changes = {}
+    if r.ticked > 0 then changes[#changes + 1] = r.ticked .. ' newly ticked' end
+    if r.unticked > 0 then changes[#changes + 1] = r.unticked .. ' unticked' end
+    if #changes > 0 then msg = msg .. ' (' .. table.concat(changes, ', ') .. ')' end
+    seerNote(msg .. '.')
+    for _, line in ipairs(r.unknown) do
+        seerNote('\ayunrecognised Seer line\ax (please report it): ' .. line)
+    end
+end
+
+mq.event('etSeerStart', 'At the moment, your credit is as follows#*#', onSeerStart)
+mq.event('etSeerLine', 'You have #1#', onSeerLine)
+
+-- Find her in this zone (there are other Seers in PoK).
+local function findSeer()
+    local n = mq.TLO.SpawnCount('npc Seer')() or 0
+    for i = 1, math.min(n, 20) do
+        local sp = mq.TLO.NearestSpawn(i, 'npc Seer')
+        local name = sp and sp.CleanName() or ''
+        if name:find(SEER_NAME, 1, true) then return sp end
+    end
+end
+
+local function runSeerAsk()
+    seerAsk = false
+    if mq.TLO.MacroQuest.GameState() ~= 'INGAME' then return end
+    local sp = findSeer()
+    if not sp then
+        seerNote('Seer Mal Nae`Shi is not in this zone. She is in the Plane of Knowledge.')
+        return
+    end
+    local id = sp.ID()
+    mq.cmdf('/target id %d', id)
+    mq.delay(1500, function() return mq.TLO.Target.ID() == id end)
+    if mq.TLO.Target.ID() ~= id then
+        seerNote('could not target Seer Mal Nae`Shi.')
+        return
+    end
+    local dist = sp.Distance() or 0
+    if dist > SEER_FAR then
+        seerNote(string.format('is %d away from the Seer. If she does not answer, move closer.', math.floor(dist)))
+    end
+    for i, phrase in ipairs(SEER_PHRASES) do
+        if i > 1 then mq.delay(1500) end
+        mq.cmdf('/say %s', phrase)
+    end
+end
+
 local function broadcast()
-    send({ type = 'state', name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories, links = state.links, version = VERSION })
+    send({ type = 'state', name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories, links = state.links,
+        seer = state.seer, seerAt = state.seerAt, version = VERSION })
 end
 
 mailbox = actors.register(SCRIPT, function(message)
     local m = message()
     if type(m) ~= 'table' or m.server ~= server or m.from == myName then return end
     if m.type == 'state' and m.name then
-        peers[m.name] = { class = m.class, done = m.done or {}, auto = m.auto or {}, progress = m.progress or {}, stories = m.stories or {}, seen = os.time(), version = m.version }
+        peers[m.name] = { class = m.class, done = m.done or {}, auto = m.auto or {}, progress = m.progress or {}, stories = m.stories or {},
+            seer = m.seer or {}, seerAt = m.seerAt or {}, seen = os.time(), version = m.version }
         for name, link in pairs(m.links or {}) do learnLink(name, link) end
     elseif m.type == 'hello' then
         needBroadcast = true
@@ -467,10 +605,21 @@ mailbox = actors.register(SCRIPT, function(message)
         setStep(m.key, m.value)
     elseif m.type == 'stories' and m.target == myName and m.set then
         markStories(m.set)
+    elseif m.type == 'askseer' then
+        seerAsk = true
+    elseif m.type == 'seernote' and not headless and m.text then
+        printf('\ag[EpicTracker]\ax %s: %s', m.from or '?', m.text)
     elseif m.type == 'quit' then
         running = false
     end
 end)
+
+-- "Ask the Seer": every character running the tracker (this one included).
+local function requestSeer()
+    send({ type = 'askseer' })
+    seerAsk = true
+    print('\ag[EpicTracker]\ax asking Seer Mal Nae`Shi on every character running the tracker...')
+end
 
 ---------------------------------------------------------------------------
 -- UI
@@ -480,13 +629,15 @@ local selected = myName
 local TIER_HEADERS = { 'Pre / 1.0', 'Epic 1.5', 'Epic 2.0' }
 
 local function charList()
-    local list = { { name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories, self = true } }
+    local list = { { name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories,
+        seer = state.seer, seerAt = state.seerAt, self = true } }
     local names = {}
     for n in pairs(peers) do names[#names + 1] = n end
     table.sort(names)
     for _, n in ipairs(names) do
         local p = peers[n]
-        list[#list + 1] = { name = n, class = p.class, done = p.done, auto = p.auto, progress = p.progress or {}, stories = p.stories or {}, stale = (os.time() - p.seen) > 45 }
+        list[#list + 1] = { name = n, class = p.class, done = p.done, auto = p.auto, progress = p.progress or {}, stories = p.stories or {},
+            seer = p.seer or {}, seerAt = p.seerAt or {}, stale = (os.time() - p.seen) > 45 }
     end
     return list
 end
@@ -558,6 +709,7 @@ local function toggleStep(c, key, value)
         setStep(key, value)
     else
         c.done[key] = value or nil -- optimistic, confirmed on next broadcast
+        if c.seer then c.seer[key] = nil end
         send({ type = 'set', target = c.name, key = key, value = value })
     end
 end
@@ -1059,6 +1211,21 @@ local function startOnGroup()
     printf('\ag[EpicTracker]\ax sent "%s /lua run %s bg" (the "already running" message on this character is normal).', GROUP_CMD, SCRIPT)
 end
 
+-- Small tag after a checkbox: who ticked it, or partial count.
+local function stepTag(c, key)
+    if c.seer and c.seer[key] then
+        ImGui.SameLine()
+        ImGui.TextColored(0.80, 0.60, 1.0, 1.0, 'seer')
+        if ImGui.IsItemHovered() then ImGui.SetTooltip('Confirmed by Seer Mal Nae`Shi') end
+    elseif c.auto[key] then
+        ImGui.SameLine()
+        ImGui.TextColored(0.45, 0.75, 1.0, 1.0, 'auto')
+    elseif c.progress and c.progress[key] then
+        ImGui.SameLine()
+        ImGui.TextColored(0.95, 0.75, 0.30, 1.0, string.format('%d/%d', c.progress[key][1], c.progress[key][2]))
+    end
+end
+
 local function drawSteps(c, tier)
     local flags = ImGuiTableFlags.Borders + ImGuiTableFlags.RowBg
     if not ImGui.BeginTable('steps_' .. tier.id, 4, flags) then return end
@@ -1076,13 +1243,7 @@ local function drawSteps(c, tier)
         local val = c.done[key] == true
         local newVal, pressed = ImGui.Checkbox('##' .. key, val)
         if pressed then toggleStep(c, key, newVal) end
-        if c.auto[key] then
-            ImGui.SameLine()
-            ImGui.TextColored(0.45, 0.75, 1.0, 1.0, 'auto')
-        elseif c.progress and c.progress[key] then
-            ImGui.SameLine()
-            ImGui.TextColored(0.95, 0.75, 0.30, 1.0, string.format('%d/%d', c.progress[key][1], c.progress[key][2]))
-        end
+        stepTag(c, key)
 
         ImGui.TableNextColumn()
         ImGui.Text(tostring(si))
@@ -1203,6 +1364,16 @@ local function storiesCell(c, setId, idSuffix)
     end
 end
 
+local function seerAgo(c, setId)
+    local t = (c.seerAt or {})[setId]
+    if not t then return 'never' end
+    local d = math.max(0, os.time() - t)
+    if d < 60 then return 'just now' end
+    if d < 3600 then return string.format('%dm ago', math.floor(d / 60)) end
+    if d < 86400 then return string.format('%dh ago', math.floor(d / 3600)) end
+    return string.format('%dd ago', math.floor(d / 86400))
+end
+
 local function flagStepText(sec, st, key)
     if st.optional then
         ImGui.TextDisabled(st.text)
@@ -1216,6 +1387,7 @@ local function flagStepText(sec, st, key)
         if st.notes then ImGui.TextWrapped(st.notes) end
         for i, line in ipairs(st.details or {}) do ImGui.TextWrapped(i .. '. ' .. line) end
         if st.detect then ImGui.TextColored(0.45, 0.75, 1.0, 1.0, 'Auto-detects: ' .. detectText(st)) end
+        if st.seer then ImGui.TextColored(0.80, 0.60, 1.0, 1.0, 'Seer checks this one') end
         if st.optional then ImGui.TextDisabled('Optional: only one person in the raid needs this. Not counted in progress.') end
         ImGui.PopTextWrapPos()
         ImGui.EndTooltip()
@@ -1225,10 +1397,11 @@ end
 local function drawFlagGrid(list, fdata)
     -- Per-character summary
     local tflags = ImGuiTableFlags.Borders + ImGuiTableFlags.RowBg
-    if ImGui.BeginTable('flagsum_' .. fdata.id, 3, tflags) then
+    if ImGui.BeginTable('flagsum_' .. fdata.id, 4, tflags) then
         ImGui.TableSetupColumn('Character', ImGuiTableColumnFlags.WidthFixed, 130)
         ImGui.TableSetupColumn('Progress', ImGuiTableColumnFlags.WidthStretch)
         ImGui.TableSetupColumn('Figurine stories', ImGuiTableColumnFlags.WidthFixed, 190)
+        ImGui.TableSetupColumn('Seer checked', ImGuiTableColumnFlags.WidthFixed, 90)
         ImGui.TableHeadersRow()
         for _, c in ipairs(list) do
             ImGui.TableNextRow()
@@ -1239,6 +1412,8 @@ local function drawFlagGrid(list, fdata)
             ImGui.ProgressBar(n > 0 and d / n or 0, -1, 0, string.format('%d/%d', d, n))
             ImGui.TableNextColumn()
             storiesCell(c, fdata.id, 'sum' .. c.name)
+            ImGui.TableNextColumn()
+            ImGui.TextDisabled(seerAgo(c, fdata.id))
         end
         ImGui.EndTable()
     end
@@ -1269,13 +1444,7 @@ local function drawFlagGrid(list, fdata)
                         local val = c.done[key] == true
                         local newVal, pressed = ImGui.Checkbox('##' .. key .. '_' .. c.name, val)
                         if pressed then toggleStep(c, key, newVal) end
-                        if c.auto[key] then
-                            ImGui.SameLine()
-                            ImGui.TextColored(0.45, 0.75, 1.0, 1.0, 'auto')
-                        elseif c.progress and c.progress[key] then
-                            ImGui.SameLine()
-                            ImGui.TextColored(0.95, 0.75, 0.30, 1.0, string.format('%d/%d', c.progress[key][1], c.progress[key][2]))
-                        end
+                        stepTag(c, key)
                     end
                 end
                 ImGui.EndTable()
@@ -1301,6 +1470,8 @@ local function drawFlagList(list, fdata)
     ImGui.Text('|  Figurine stories:')
     ImGui.SameLine()
     storiesCell(sel, fdata.id, 'list' .. sel.name)
+    ImGui.SameLine()
+    ImGui.TextDisabled('|  Seer checked: ' .. seerAgo(sel, fdata.id))
 
     for _, sec in ipairs(fdata.sections) do
         local sd, sn = sectionCounts(sec, sel.done)
@@ -1334,6 +1505,16 @@ local function drawFlagSet(list, setId)
     if ImGui.RadioButton('Grid##fv', flagView == 'grid') then flagView = 'grid' end
     ImGui.SameLine()
     if ImGui.RadioButton('Checklist##fv', flagView == 'list') then flagView = 'list' end
+    if setId == 'pop' then
+        ImGui.SameLine()
+        if ImGui.Button('Ask the Seer') then requestSeer() end
+        if ImGui.IsItemHovered() then
+            ImGui.SetTooltip('Stand everyone next to Seer Mal Nae`Shi in the Plane of Knowledge, then click.\n'
+                .. 'Every character running the tracker targets her and says "guided meditation",\n'
+                .. 'then "unlock memories". Her answer ticks (and unticks) your PoP flags.\n'
+                .. 'Talking to her by hand works too. Also /epictracker seer')
+        end
+    end
     if fdata.note then ImGui.TextWrapped(fdata.note) end
     if fdata.source then ImGui.TextDisabled('(steps from ' .. fdata.source .. ')') end
 
@@ -1423,6 +1604,8 @@ mq.bind('/epictracker', function(cmd)
         if upd.phase == 'available' or upd.phase == 'confirm' then upd.open = true else checkForUpdate(false) end
     elseif cmd == 'group' then
         startOnGroup()
+    elseif cmd == 'seer' then
+        requestSeer()
     elseif cmd == 'quit' then
         running = false
     elseif cmd == 'quitall' then
@@ -1451,6 +1634,9 @@ while running do
         checkForUpdate(true)
     end
     pollUpdater()
+    mq.doevents()
+    finishSeerRead()
+    if seerAsk then runSeerAsk() end
     if now - lastScan >= 5 then
         if scan() then saveState(); dirty = true end
         lastScan = now
