@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.6.0 (2026-11-22) -->
+<!-- EpicTracker v1.7.0 (2026-11-22) -->
 # Step data format
 
 Each class lives in `lua/epictracker/data/<class>.lua` and returns one Lua table.
@@ -39,7 +39,8 @@ return {
 | `reward` (tier) | no | Item shown as a clickable **Reward:** at the top of the tier tab. Defaults to the last step's detect item. |
 | `id` | yes | Unique within the tier. **The save key**: never rename or reuse an id once released, or people lose that checkbox. To insert a step, give it a new id like `s4b`. |
 | `text` | yes | What to do, one line. |
-| `zone` | yes | Where (`'-'` for crafting or skill-ups). |
+| `zone` | yes | Where (`'-'` for crafting or skill-ups). Several zones: `"Kod'Taz / Yxtta"` or `'Barindu or Qinimi'`. Used by the This Zone tab, through `zones.lua` (see below). |
+| `zones` | no | EQ zone short names, if `zone` text can't be matched: `zones = { 'potranquility' }`. |
 | `notes` | no | Longer explanation, shown in the dropdown. |
 | `details` | no | List of numbered sub-steps, shown in the dropdown. |
 | `url`, `urlLabel` | no | Extra link button inside the dropdown. |
@@ -98,6 +99,15 @@ return {
 - Item names must be exact, including backticks (`` Teir`Dal ``) and apostrophes.
 - Don't detect items that appear at several steps. Detect the first one, or use `after`.
 - Generic names (`Soulstone Shard`, `Broken Sword Piece`) are best left undetected.
+
+## Zones (`lua/epictracker/zones.lua`)
+
+The This Zone tab matches each step's `zone` text to the zone you're in (`${Zone.ShortName}`). `zones.lua` maps the names used in the data to EQ short names, for example `["nedaria's landing"] = { 'nedaria' }`.
+
+- Matching ignores case and a leading "The ". A trailing note in brackets is dropped: `'Lake of Ill Omen (Sarnak fort)'` works.
+- Several zones are split on ` / `, ` or ` and `, `.
+- `'-'`, `'various'` and whole regions (`'Luclin'`, `'OoW zones'`) never match anything, so those steps don't show in This Zone.
+- Using a new zone name? Add it to `zones.lua`, then run `lua tools/check_zones.lua` from the repo root. It lists every step whose zone doesn't match.
 
 ## Testing your change
 

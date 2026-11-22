@@ -1,5 +1,18 @@
-<!-- EpicTracker v1.6.0 (2026-11-22) -->
+<!-- EpicTracker v1.7.0 (2026-11-22) -->
 # Changelog
+
+## 1.7.0 (2026-11-22)
+
+- **This Zone tab.** Shows what your characters can do in the zone your main is standing in:
+  - **Epic steps:** each character's next 3 open steps that happen here.
+  - **PoP flags:** every open flag in this zone.
+  - Each row lists who needs it. Characters in another zone are greyed out with where they are, like "Boxrogue (in The Bazaar)". Boxes now share which zone they're in.
+  - Updates by itself when you zone. Hover a step for its notes.
+- **Tell Gram** button on the PoP Flags tab (also `/epictracker gram`): every character hails Gram Dunnar and says "stories". His "Please tell me another story!" counts as clicking Told Gram, so the "stories due" reminder clears by itself. Saying "stories" by hand works too.
+  - Only counts for a character that said "stories" in the last 10 seconds, so a box standing nearby isn't marked when he answers someone else.
+- New `zones.lua`: maps every zone name in the step data (179 of them, abbreviations like MPG and PoTranq included) to EverQuest zone short names. New optional step field `zones` for anything it can't match.
+- New `tools/check_zones.lua`: lists any step zone that doesn't match. All 752 steps pass.
+- Ask the Seer and Tell Gram share one "talk to an NPC on every box" routine.
 
 ## 1.6.0 (2026-11-22)
 

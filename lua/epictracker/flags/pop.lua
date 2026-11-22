@@ -1,4 +1,4 @@
--- EpicTracker v1.6.0 (2026-11-22)
+-- EpicTracker v1.7.0 (2026-11-22)
 -- Planes of Power flags (the "Storytime" quest for the Intricate Wooden Figurine).
 -- Source: Project Lazarus wiki, "Planes of Power Flagging" (last updated 06-29-2025 by Korwar).
 -- See docs/DATA_FORMAT.md. Extra fields used here:

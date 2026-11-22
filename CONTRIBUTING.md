@@ -1,4 +1,4 @@
-<!-- EpicTracker v1.6.0 (2026-11-22) -->
+<!-- EpicTracker v1.7.0 (2026-11-22) -->
 # Contributing
 
 The most useful help is **checking steps against Project Lazarus**. The data came from live-server guides, and Lazarus has tweaked epics.
@@ -17,6 +17,7 @@ Open an issue with:
 1. Fork the repo and edit `lua/epictracker/data/<class>.lua`.
 2. Follow [docs/DATA_FORMAT.md](docs/DATA_FORMAT.md). The one hard rule: **never rename or reuse a step `id`**, because it's the save key. Add new steps with new ids (`s7b`), and remove steps by deleting them.
 3. Test it in game (`/lua stop epictracker`, then `/lua run epictracker`).
+   If you used a zone name that's new to the data, run `lua tools/check_zones.lua` too (see DATA_FORMAT.md).
 4. Open a pull request saying what you changed and that you verified it on Lazarus.
 
 ## Contributing item links

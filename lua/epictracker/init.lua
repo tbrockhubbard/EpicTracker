@@ -1,4 +1,4 @@
--- EpicTracker v1.6.0 (2026-11-22)
+-- EpicTracker v1.7.0 (2026-11-22)
 --[[
   EpicTracker - tracks Epic 1.5 pre-quest, Epic 1.5 and Epic 2.0 progress
   across all your boxed characters.
@@ -6,7 +6,7 @@
   Main character:   /lua run epictracker           (with window)
   Whole group:      /e3bcga /lua run epictracker bg (bots report in, no window)
                     or press "Start on group" in the window / type /epictracker group
-  Slash command:    /epictracker [show|hide|scan|refresh|group|seer|update|updatelinkdb|exportlinks|quit|quitall]
+  Slash command:    /epictracker [show|hide|scan|refresh|group|seer|gram|update|updatelinkdb|exportlinks|quit|quitall]
 
   Progress is saved per character in your MQ config folder and shared between
   clients with MQ's built-in actors messaging. E3 is only used to launch it.
@@ -17,7 +17,7 @@ local ImGui = require('ImGui')
 local actors = require('actors')
 
 local SCRIPT = 'epictracker'
-local VERSION = '1.6.0'
+local VERSION = '1.7.0'
 
 -- Command used to send a command to every character in the group.
 -- Project Lazarus + E3Next: /e3bcga (all, including you). DanNet users: /dgga
@@ -25,9 +25,20 @@ local GROUP_CMD = '/e3bcga'
 
 -- PoP flag check: Seer Mal Nae`Shi in the Plane of Knowledge. "Ask the Seer" makes every
 -- character target her and say these two phrases; her "unlock memories" answer ticks flags.
-local SEER_NAME = 'Mal Nae'          -- part of her name, to pick her out of the Seers
-local SEER_PHRASES = { 'guided meditation', 'unlock memories' }
-local SEER_FAR = 50                  -- warn (but still try) beyond this distance
+-- NPCs the tracker can talk to for you on every character (Ask the Seer, Tell Gram).
+--   search: MQ spawn search, match: part of the name to pick the right one,
+--   says: what to say, in order (1.5 s apart). '%name%' is replaced with the NPC's name.
+local NPCS = {
+    seer = { label = 'Seer Mal Nae`Shi', where = 'the Plane of Knowledge', search = 'npc Seer', match = 'Mal Nae',
+             says = { 'guided meditation', 'unlock memories' } },
+    -- Gram Dunnar only answers "Please tell me another story!", which counts as "Told Gram".
+    gram = { label = 'Gram Dunnar', where = 'the Plane of Knowledge', search = 'npc Gram', match = 'Gram Dunnar',
+             says = { 'Hail, %name%', 'stories' } },
+}
+local NPC_FAR = 50                   -- warn (but still try) beyond this distance
+
+-- This Zone tab: how many of each character's next open epic steps to look at.
+local ZONE_NEXT_STEPS = 3
 
 -- Lazarus wiki (toolbar button)
 local WIKI_URL = 'https://www.lazaruseq.com/'
@@ -456,7 +467,7 @@ end
 ---------------------------------------------------------------------------
 local peers = {}
 local mailbox
-local seerAsk = false   -- set by the button or a box message; run from the main loop
+local talkQueue = {}    -- NPC keys to talk to, set by a button or a box message; run from the main loop
 
 local function send(msg)
     msg.server = server
@@ -552,44 +563,70 @@ end
 mq.event('etSeerStart', 'At the moment, your credit is as follows#*#', onSeerStart)
 mq.event('etSeerLine', 'You have #1#', onSeerLine)
 
--- Find her in this zone (there are other Seers in PoK).
-local function findSeer()
-    local n = mq.TLO.SpawnCount('npc Seer')() or 0
+-- Gram Dunnar's answer to "stories". Counts as clicking "Told Gram" for this character, but
+-- only if this character said "stories" in the last few seconds: boxes standing nearby
+-- hear him answer your main too.
+local saidStoriesAt = 0
+local function onMySay(_, text)
+    if tostring(text or ''):lower():match('^%s*stories') then saidStoriesAt = os.time() end
+end
+mq.event('etMySay', "You say, '#1#'", onMySay)
+
+local function onGramStory(line)
+    if not tostring(line or ''):find('Gram Dunnar', 1, true) then return end
+    if os.time() - saidStoriesAt > 10 then return end
+    local fdata = getFlagData('pop')
+    if not fdata then return end
+    local before = storiesDue('pop', { done = state.done, stories = state.stories })
+    markStories('pop')
+    if before > 0 then seerNote(string.format('told Gram Dunnar %d new stor%s.', before, before == 1 and 'y' or 'ies')) end
+end
+mq.event('etGramStory', '#*#Please tell me another story#*#', onGramStory)
+
+-- Finds the NPC in this zone (there are several Seers in PoK).
+local function findNpc(npc)
+    local n = mq.TLO.SpawnCount(npc.search)() or 0
     for i = 1, math.min(n, 20) do
-        local sp = mq.TLO.NearestSpawn(i, 'npc Seer')
+        local sp = mq.TLO.NearestSpawn(i, npc.search)
         local name = sp and sp.CleanName() or ''
-        if name:find(SEER_NAME, 1, true) then return sp end
+        if name:find(npc.match, 1, true) then return sp, name end
     end
 end
 
-local function runSeerAsk()
-    seerAsk = false
-    if mq.TLO.MacroQuest.GameState() ~= 'INGAME' then return end
-    local sp = findSeer()
+local function talkTo(key)
+    local npc = NPCS[key]
+    if not npc or mq.TLO.MacroQuest.GameState() ~= 'INGAME' then return end
+    local sp, name = findNpc(npc)
     if not sp then
-        seerNote('Seer Mal Nae`Shi is not in this zone. She is in the Plane of Knowledge.')
+        seerNote(string.format('%s is not in this zone. Look in %s.', npc.label, npc.where))
         return
     end
     local id = sp.ID()
     mq.cmdf('/target id %d', id)
     mq.delay(1500, function() return mq.TLO.Target.ID() == id end)
     if mq.TLO.Target.ID() ~= id then
-        seerNote('could not target Seer Mal Nae`Shi.')
+        seerNote('could not target ' .. npc.label .. '.')
         return
     end
     local dist = sp.Distance() or 0
-    if dist > SEER_FAR then
-        seerNote(string.format('is %d away from the Seer. If she does not answer, move closer.', math.floor(dist)))
+    if dist > NPC_FAR then
+        seerNote(string.format('is %d away from %s. If nothing happens, move closer.', math.floor(dist), npc.label))
     end
-    for i, phrase in ipairs(SEER_PHRASES) do
+    for i, phrase in ipairs(npc.says) do
         if i > 1 then mq.delay(1500) end
-        mq.cmdf('/say %s', phrase)
+        mq.cmdf('/say %s', (phrase:gsub('%%name%%', name)))
     end
 end
 
+-- Zone this character is in (shared with the group for the This Zone tab).
+local function currentZone()
+    return (mq.TLO.Zone.ShortName() or ''):lower(), mq.TLO.Zone.Name() or ''
+end
+local myZone, myZoneName = '', ''
+
 local function broadcast()
     send({ type = 'state', name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories, links = state.links,
-        seer = state.seer, seerAt = state.seerAt, version = VERSION })
+        seer = state.seer, seerAt = state.seerAt, zone = myZone, zoneName = myZoneName, version = VERSION })
 end
 
 mailbox = actors.register(SCRIPT, function(message)
@@ -597,7 +634,7 @@ mailbox = actors.register(SCRIPT, function(message)
     if type(m) ~= 'table' or m.server ~= server or m.from == myName then return end
     if m.type == 'state' and m.name then
         peers[m.name] = { class = m.class, done = m.done or {}, auto = m.auto or {}, progress = m.progress or {}, stories = m.stories or {},
-            seer = m.seer or {}, seerAt = m.seerAt or {}, seen = os.time(), version = m.version }
+            seer = m.seer or {}, seerAt = m.seerAt or {}, zone = m.zone, zoneName = m.zoneName, seen = os.time(), version = m.version }
         for name, link in pairs(m.links or {}) do learnLink(name, link) end
     elseif m.type == 'hello' then
         needBroadcast = true
@@ -606,7 +643,9 @@ mailbox = actors.register(SCRIPT, function(message)
     elseif m.type == 'stories' and m.target == myName and m.set then
         markStories(m.set)
     elseif m.type == 'askseer' then
-        seerAsk = true
+        talkQueue.seer = true
+    elseif m.type == 'talk' and NPCS[m.npc] then
+        talkQueue[m.npc] = true
     elseif m.type == 'seernote' and not headless and m.text then
         printf('\ag[EpicTracker]\ax %s: %s', m.from or '?', m.text)
     elseif m.type == 'quit' then
@@ -614,12 +653,13 @@ mailbox = actors.register(SCRIPT, function(message)
     end
 end)
 
--- "Ask the Seer": every character running the tracker (this one included).
-local function requestSeer()
-    send({ type = 'askseer' })
-    seerAsk = true
-    print('\ag[EpicTracker]\ax asking Seer Mal Nae`Shi on every character running the tracker...')
+-- "Ask the Seer" / "Tell Gram": every character running the tracker (this one included).
+local function requestTalk(key)
+    send({ type = 'talk', npc = key })
+    talkQueue[key] = true
+    printf('\ag[EpicTracker]\ax talking to %s on every character running the tracker...', NPCS[key].label)
 end
+local function requestSeer() requestTalk('seer') end
 
 ---------------------------------------------------------------------------
 -- UI
@@ -630,14 +670,14 @@ local TIER_HEADERS = { 'Pre / 1.0', 'Epic 1.5', 'Epic 2.0' }
 
 local function charList()
     local list = { { name = myName, class = myClass, done = state.done, auto = state.auto, progress = state.progress, stories = state.stories,
-        seer = state.seer, seerAt = state.seerAt, self = true } }
+        seer = state.seer, seerAt = state.seerAt, zone = myZone, zoneName = myZoneName, self = true } }
     local names = {}
     for n in pairs(peers) do names[#names + 1] = n end
     table.sort(names)
     for _, n in ipairs(names) do
         local p = peers[n]
         list[#list + 1] = { name = n, class = p.class, done = p.done, auto = p.auto, progress = p.progress or {}, stories = p.stories or {},
-            seer = p.seer or {}, seerAt = p.seerAt or {}, stale = (os.time() - p.seen) > 45 }
+            seer = p.seer or {}, seerAt = p.seerAt or {}, zone = p.zone, zoneName = p.zoneName, stale = (os.time() - p.seen) > 45 }
     end
     return list
 end
@@ -1514,6 +1554,14 @@ local function drawFlagSet(list, setId)
                 .. 'then "unlock memories". Her answer ticks (and unticks) your PoP flags.\n'
                 .. 'Talking to her by hand works too. Also /epictracker seer')
         end
+        ImGui.SameLine()
+        if ImGui.Button('Tell Gram') then requestTalk('gram') end
+        if ImGui.IsItemHovered() then
+            ImGui.SetTooltip('Stand everyone next to Gram Dunnar in the Plane of Knowledge, then click.\n'
+                .. 'Every character running the tracker hails him and says "stories".\n'
+                .. 'His "Please tell me another story!" marks that character as told (same as Told Gram).\n'
+                .. 'Saying "stories" to him by hand works too. Also /epictracker gram')
+        end
     end
     if fdata.note then ImGui.TextWrapped(fdata.note) end
     if fdata.source then ImGui.TextDisabled('(steps from ' .. fdata.source .. ')') end
@@ -1523,6 +1571,157 @@ local function drawFlagSet(list, setId)
     else
         drawFlagList(list, fdata)
     end
+end
+
+---------------------------------------------------------------------------
+-- This Zone tab: open steps in the zone your main is standing in
+---------------------------------------------------------------------------
+local zonesMod
+do
+    local ok, t = pcall(require, SCRIPT .. '.zones')
+    if ok and type(t) == 'table' then zonesMod = t
+    else printf('\ar[EpicTracker]\ax failed to load zones.lua: %s', tostring(t)) end
+end
+
+local zoneSetCache, zoneListCache = {}, {}
+local function stepZones(st)
+    if st.zones then
+        local set = zoneListCache[st]
+        if not set then
+            set = {}
+            for _, sn in ipairs(st.zones) do set[tostring(sn):lower()] = true end
+            zoneListCache[st] = set
+        end
+        return set
+    end
+    local text = st.zone or ''
+    local set = zoneSetCache[text]
+    if not set then
+        set = zonesMod and zonesMod.resolve(text) or {}
+        zoneSetCache[text] = set
+    end
+    return set
+end
+
+-- Rows for one zone: each character's next few open epic steps that are here, and every
+-- open flag step that is here. Rows are shared between characters who need the same step.
+local function zoneRows(list, zone)
+    local epics, flags, byId = {}, {}, {}
+    local function add(into, id, row, c)
+        local r = byId[id]
+        if not r then
+            r = row
+            r.who = {}
+            byId[id] = r
+            into[#into + 1] = r
+        end
+        r.who[#r.who + 1] = c
+    end
+    for _, c in ipairs(list) do
+        local data = getClassData(c.class)
+        if data then
+            local found = 0
+            for _, tier in ipairs(data.tiers) do
+                for si, st in ipairs(tier.steps) do
+                    if found >= ZONE_NEXT_STEPS then break end
+                    local key = stepKey(tier, st)
+                    if not c.done[key] then
+                        found = found + 1
+                        if stepZones(st)[zone] then
+                            add(epics, c.class .. ':' .. key,
+                                { st = st, key = key, from = string.format('%s %s, step %d', c.class, tier.short or tier.name, si) }, c)
+                        end
+                    end
+                end
+                if found >= ZONE_NEXT_STEPS then break end
+            end
+        end
+        for _, fid in ipairs(FLAG_SETS) do
+            local fdata = getFlagData(fid)
+            for _, sec in ipairs(fdata and fdata.sections or {}) do
+                for _, st in ipairs(sec.steps) do
+                    local key = stepKey(sec, st)
+                    if not c.done[key] and stepZones(st)[zone] then
+                        add(flags, 'flag:' .. key, { st = st, key = key, from = (fdata.short or fdata.name) .. ': ' .. sec.name }, c)
+                    end
+                end
+            end
+        end
+    end
+    return epics, flags
+end
+
+local function whoCell(r, zone)
+    for i, c in ipairs(r.who) do
+        if i > 1 then ImGui.SameLine(); ImGui.TextDisabled('·'); ImGui.SameLine() end
+        if c.stale then
+            ImGui.TextDisabled(c.name .. ' (offline)')
+        elseif c.self or c.zone == zone then
+            ImGui.Text(c.name)
+        else
+            ImGui.TextDisabled(string.format('%s (in %s)', c.name, (c.zoneName and c.zoneName ~= '') and c.zoneName or 'unknown zone'))
+        end
+    end
+end
+
+local function zoneTable(id, title, rows, zone)
+    ImGui.TextColored(0.85, 0.75, 0.45, 1.0, string.format('%s (%d)', title, #rows))
+    if #rows == 0 then return end
+    local tflags = ImGuiTableFlags.Borders + ImGuiTableFlags.RowBg
+    if ImGui.BeginTable(id, 3, tflags) then
+        ImGui.TableSetupColumn('Step', ImGuiTableColumnFlags.WidthStretch)
+        ImGui.TableSetupColumn('From', ImGuiTableColumnFlags.WidthFixed, 190)
+        ImGui.TableSetupColumn('Who needs it', ImGuiTableColumnFlags.WidthStretch)
+        ImGui.TableHeadersRow()
+        for _, r in ipairs(rows) do
+            ImGui.TableNextRow()
+            ImGui.TableNextColumn()
+            flagStepText(nil, r.st, r.key)
+            ImGui.TableNextColumn()
+            ImGui.TextDisabled(r.from)
+            ImGui.TableNextColumn()
+            whoCell(r, zone)
+        end
+        ImGui.EndTable()
+    end
+end
+
+local function drawThisZone(list)
+    local zone, zoneName = myZone, myZoneName
+    ImGui.Text('You are in:')
+    ImGui.SameLine()
+    ImGui.TextColored(0.55, 0.85, 1.0, 1.0, zoneName ~= '' and zoneName or '?')
+    ImGui.SameLine()
+    ImGui.TextDisabled('(' .. zone .. ')')
+    ImGui.SameLine()
+    ImGui.TextDisabled('(?)')
+    if ImGui.IsItemHovered() then
+        ImGui.SetTooltip(string.format('Each character\'s next %d open epic steps, and every open PoP flag, that happen in this zone.\n'
+            .. 'Characters in another zone are greyed out with where they are.\n'
+            .. 'Tick steps off on the Epics and PoP Flags tabs.', ZONE_NEXT_STEPS))
+    end
+    if not zonesMod then
+        ImGui.TextDisabled('zones.lua failed to load. Check the MQ console.')
+        return
+    end
+    local elsewhere = {}
+    for _, c in ipairs(list) do
+        if not c.self and not c.stale and c.zone ~= zone then
+            elsewhere[#elsewhere + 1] = string.format('%s (%s)', c.name, (c.zoneName and c.zoneName ~= '') and c.zoneName or 'unknown')
+        end
+    end
+    if #elsewhere > 0 then ImGui.TextDisabled('Elsewhere: ' .. table.concat(elsewhere, ', ')) end
+
+    local epics, flags = zoneRows(list, zone)
+    if #epics == 0 and #flags == 0 then
+        ImGui.Separator()
+        ImGui.TextDisabled("Nothing on anyone's next epic steps or open PoP flags happens here.")
+        return
+    end
+    ImGui.Separator()
+    zoneTable('zone_epics', 'Epic steps', epics, zone)
+    ImGui.Spacing()
+    zoneTable('zone_flags', 'PoP flags', flags, zone)
 end
 
 local function draw()
@@ -1575,6 +1774,10 @@ local function draw()
                 drawFlagSet(list, 'pop')
                 ImGui.EndTabItem()
             end
+            if ImGui.BeginTabItem('This Zone') then
+                drawThisZone(list)
+                ImGui.EndTabItem()
+            end
             ImGui.EndTabBar()
         end
     end
@@ -1606,6 +1809,8 @@ mq.bind('/epictracker', function(cmd)
         startOnGroup()
     elseif cmd == 'seer' then
         requestSeer()
+    elseif cmd == 'gram' then
+        requestTalk('gram')
     elseif cmd == 'quit' then
         running = false
     elseif cmd == 'quitall' then
@@ -1636,7 +1841,14 @@ while running do
     pollUpdater()
     mq.doevents()
     finishSeerRead()
-    if seerAsk then runSeerAsk() end
+    local z, zn = currentZone()
+    if z ~= myZone then myZone, myZoneName, dirty = z, zn, true end
+    if next(talkQueue) then
+        local keys = {}
+        for key in pairs(talkQueue) do keys[#keys + 1] = key end
+        talkQueue = {}
+        for _, key in ipairs(keys) do talkTo(key) end
+    end
     if now - lastScan >= 5 then
         if scan() then saveState(); dirty = true end
         lastScan = now

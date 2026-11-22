@@ -1,4 +1,4 @@
--- EpicTracker v1.6.0 (2026-11-22)
+-- EpicTracker v1.7.0 (2026-11-22)
 -- Druid epic data. See docs/DATA_FORMAT.md for the step format.
 -- Sources: eqprogression.com (pre, 2.0), allakhazam wiki (1.5). Live steps; verify on Lazarus.
 local E = 'https://www.eqprogression.com/'
